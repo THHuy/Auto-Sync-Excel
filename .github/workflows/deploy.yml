@@ -56,6 +56,7 @@ jobs:
           mkdir -p outputs
 
           ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
+          sudo systemctl daemon-reload
           sudo systemctl restart auto-sync-excel
 
           for attempt in $(seq 1 30); do

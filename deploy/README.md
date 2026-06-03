@@ -144,6 +144,12 @@ Thêm dòng:
 ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart auto-sync-excel, /bin/systemctl status auto-sync-excel, /bin/journalctl -u auto-sync-excel -n 120 --no-pager
 ```
 
+Neu workflow can reload systemd unit sau khi service file thay doi, them ca lenh nay:
+
+```text
+ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl daemon-reload, /bin/systemctl restart auto-sync-excel, /bin/systemctl status auto-sync-excel, /bin/journalctl -u auto-sync-excel -n 120 --no-pager
+```
+
 ## 7. Auto deploy
 
 Mỗi lần push vào nhánh `main`, workflow `.github/workflows/deploy.yml` sẽ:
