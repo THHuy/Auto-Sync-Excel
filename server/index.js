@@ -42,6 +42,27 @@ function parseMapping(value) {
   }
 }
 
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data:",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join("; "),
+  );
+  next();
+});
+
+app.get("/favicon.ico", (req, res) => {
+  res.status(204).end();
+});
+
 app.use(express.static(path.join(__dirname, "..", "dist")));
 
 app.get("/health", (req, res) => {
@@ -84,6 +105,10 @@ app.post(
     }
   },
 );
+
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "API endpoint khong ton tai." });
+});
 
 app.get(/^(?!\/api\/|\/health$).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
