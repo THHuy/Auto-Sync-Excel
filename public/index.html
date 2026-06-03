@@ -18,22 +18,37 @@
 
       <section class="workspace">
         <form id="syncForm" class="sync-panel">
+          <div class="section-heading">
+            <div>
+              <h2>Chọn file</h2>
+              <p>Nguồn là báo cáo tồn kho, đích là file danh mục cần cập nhật.</p>
+            </div>
+          </div>
+
           <div class="drop-grid">
             <label class="drop-zone" data-drop-zone="source">
               <input id="sourceInput" name="source" type="file" accept=".xls,.xlsx" />
-              <span class="drop-icon">↑</span>
+              <span class="step-badge">1</span>
+              <span class="drop-icon">↥</span>
               <span class="drop-title">File tồn kho</span>
-              <span class="drop-note">Kéo thả hoặc bấm để chọn .xls/.xlsx</span>
+              <span class="drop-note">Kéo thả hoặc bấm để chọn</span>
               <span class="file-name" id="sourceName">Chưa chọn file</span>
             </label>
 
             <label class="drop-zone" data-drop-zone="target">
               <input id="targetInput" name="target" type="file" accept=".xls,.xlsx" />
-              <span class="drop-icon">□</span>
+              <span class="step-badge">2</span>
+              <span class="drop-icon">▣</span>
               <span class="drop-title">File danh mục</span>
-              <span class="drop-note">File mẫu cần ghi dữ liệu đồng bộ</span>
+              <span class="drop-note">File mẫu cần ghi dữ liệu</span>
               <span class="file-name" id="targetName">Chưa chọn file</span>
             </label>
+          </div>
+
+          <div class="section-heading compact">
+            <div>
+              <h2>Tùy chọn</h2>
+            </div>
           </div>
 
           <div class="options">
@@ -56,7 +71,10 @@
           </div>
 
           <div class="actions">
-            <button id="syncButton" type="submit">Đồng bộ và tải file</button>
+            <button id="syncButton" class="primary-button" type="submit">
+              <span>↧</span>
+              Đồng bộ và tải file
+            </button>
             <a id="downloadLink" class="download-link" hidden>Tải lại file kết quả</a>
           </div>
         </form>
@@ -64,8 +82,15 @@
         <aside class="info-panel">
           <div class="mapping-panel">
             <div class="panel-heading">
-              <h2>Mapping</h2>
-              <button class="icon-button" id="editMappingButton" type="button" title="Sửa mapping">✎</button>
+              <div>
+                <h2>Mapping</h2>
+                <p id="mappingModeText">Đang khóa chỉnh sửa</p>
+              </div>
+              <div class="mapping-header-actions">
+                <button class="secondary-button" id="editMappingButton" type="button">✎ Sửa</button>
+                <button class="secondary-button success-button" id="saveMappingButton" type="button" hidden>✓ Lưu</button>
+                <button class="secondary-button" id="cancelMappingButton" type="button" hidden>Hủy</button>
+              </div>
             </div>
             <input id="mappingJson" name="mappingJson" type="hidden" form="syncForm" />
             <table class="mapping-table">
@@ -80,7 +105,7 @@
             </table>
             <div class="mapping-tools" id="mappingTools" hidden>
               <button class="secondary-button" id="addMappingButton" type="button">+ Thêm dòng</button>
-              <button class="secondary-button" id="resetMappingButton" type="button">Khôi phục mặc định</button>
+              <button class="secondary-button danger-light-button" id="resetMappingButton" type="button">Khôi phục mặc định</button>
             </div>
           </div>
 

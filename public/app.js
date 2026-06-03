@@ -11,6 +11,9 @@ const sourceRecords = document.querySelector("#sourceRecords");
 const updatedRows = document.querySelector("#updatedRows");
 const addedRows = document.querySelector("#addedRows");
 const editMappingButton = document.querySelector("#editMappingButton");
+const saveMappingButton = document.querySelector("#saveMappingButton");
+const cancelMappingButton = document.querySelector("#cancelMappingButton");
+const mappingModeText = document.querySelector("#mappingModeText");
 const mappingBody = document.querySelector("#mappingBody");
 const mappingTools = document.querySelector("#mappingTools");
 const addMappingButton = document.querySelector("#addMappingButton");
@@ -31,6 +34,7 @@ const defaultMapping = [
 ];
 
 let mappingRows = structuredClone(defaultMapping);
+let mappingDraftRows = structuredClone(defaultMapping);
 let mappingEditMode = false;
 
 function normalizeDownloadName(value) {
@@ -51,7 +55,9 @@ function setStatus(text, state = "") {
 }
 
 function updateFileName(input, target) {
-  target.textContent = input.files[0]?.name || "Chưa chọn file";
+  const fileName = input.files[0]?.name || "Chưa chọn file";
+  target.textContent = fileName;
+  input.closest(".drop-zone").classList.toggle("has-file", Boolean(input.files[0]));
 }
 
 function escapeAttribute(value) {
@@ -75,21 +81,28 @@ function readMappingFromInputs() {
     return;
   }
 
-  mappingRows = [...mappingBody.querySelectorAll("tr")].map((row) => {
+  mappingDraftRows = [...mappingBody.querySelectorAll("tr")].map((row) => {
     const source = row.querySelector("[data-field='source']").value;
     const target = row.querySelector("[data-field='target']").value;
     return [source, target];
   });
-  syncMappingJson();
+}
+
+function cleanMapping(rows) {
+  return rows.map(([source, target]) => [source.trim(), target.trim()]).filter(([source, target]) => source && target);
 }
 
 function renderMapping() {
   mappingBody.innerHTML = "";
+  const rows = mappingEditMode ? mappingDraftRows : mappingRows;
+  mappingBody.closest("table").classList.toggle("is-editing", mappingEditMode);
   mappingTools.hidden = !mappingEditMode;
-  editMappingButton.textContent = mappingEditMode ? "✓" : "✎";
-  editMappingButton.title = mappingEditMode ? "Khóa mapping" : "Sửa mapping";
+  editMappingButton.hidden = mappingEditMode;
+  saveMappingButton.hidden = !mappingEditMode;
+  cancelMappingButton.hidden = !mappingEditMode;
+  mappingModeText.textContent = mappingEditMode ? "Đang chỉnh sửa" : "Đang khóa chỉnh sửa";
 
-  mappingRows.forEach(([source, target], index) => {
+  rows.forEach(([source, target], index) => {
     const row = document.createElement("tr");
 
     if (mappingEditMode) {
@@ -103,7 +116,7 @@ function renderMapping() {
       });
       row.querySelector(".row-delete").addEventListener("click", () => {
         readMappingFromInputs();
-        mappingRows.splice(index, 1);
+        mappingDraftRows.splice(index, 1);
         renderMapping();
       });
     } else {
@@ -154,17 +167,35 @@ document.querySelectorAll("[data-drop-zone]").forEach(bindDropZone);
 sourceInput.addEventListener("change", () => updateFileName(sourceInput, sourceName));
 targetInput.addEventListener("change", () => updateFileName(targetInput, targetName));
 editMappingButton.addEventListener("click", () => {
+  mappingDraftRows = structuredClone(mappingRows);
+  mappingEditMode = true;
+  renderMapping();
+});
+saveMappingButton.addEventListener("click", () => {
   readMappingFromInputs();
-  mappingEditMode = !mappingEditMode;
+  const nextMapping = cleanMapping(mappingDraftRows);
+  if (nextMapping.length === 0) {
+    setStatus("Mapping trống", "is-error");
+    return;
+  }
+  mappingRows = nextMapping;
+  mappingDraftRows = structuredClone(mappingRows);
+  mappingEditMode = false;
+  setStatus("Đã lưu mapping");
+  renderMapping();
+});
+cancelMappingButton.addEventListener("click", () => {
+  mappingDraftRows = structuredClone(mappingRows);
+  mappingEditMode = false;
   renderMapping();
 });
 addMappingButton.addEventListener("click", () => {
   readMappingFromInputs();
-  mappingRows.push(["", ""]);
+  mappingDraftRows.push(["", ""]);
   renderMapping();
 });
 resetMappingButton.addEventListener("click", () => {
-  mappingRows = structuredClone(defaultMapping);
+  mappingDraftRows = structuredClone(defaultMapping);
   renderMapping();
 });
 renderMapping();
@@ -176,6 +207,18 @@ form.addEventListener("submit", async (event) => {
   if (!sourceInput.files[0] || !targetInput.files[0]) {
     setStatus("Thiếu file", "is-error");
     return;
+  }
+
+  if (mappingEditMode) {
+    const nextMapping = cleanMapping(mappingDraftRows);
+    if (nextMapping.length === 0) {
+      setStatus("Mapping trống", "is-error");
+      return;
+    }
+    mappingRows = nextMapping;
+    mappingDraftRows = structuredClone(mappingRows);
+    mappingEditMode = false;
+    renderMapping();
   }
 
   if (!mappingJson.value || JSON.parse(mappingJson.value).length === 0) {
