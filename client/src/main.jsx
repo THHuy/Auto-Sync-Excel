@@ -1,6 +1,24 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
+import {
+  Upload,
+  Database,
+  Zap,
+  Check,
+  X,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Pencil,
+  Download,
+  CheckCircle,
+  Layers,
+  Link2,
+  FileText,
+  Sun,
+  Moon,
+} from "lucide-react";
 
 const defaultMapping = [
   ["Mã VT", "MA_LR"],
@@ -31,7 +49,7 @@ function cleanMapping(rows) {
   return rows.map(([source, target]) => [source.trim(), target.trim()]).filter(([source, target]) => source && target);
 }
 
-function DropZone({ id, name, title, note, badge, icon, file, onFileChange }) {
+function DropZone({ id, name, title, note, badge, icon: Icon, file, onFileChange }) {
   const [isOver, setIsOver] = React.useState(false);
 
   function setFile(nextFile) {
@@ -69,10 +87,23 @@ function DropZone({ id, name, title, note, badge, icon, file, onFileChange }) {
         onChange={(event) => setFile(event.target.files[0])}
       />
       <span className="step-badge">{badge}</span>
-      <span className="drop-icon">{icon}</span>
+      <span className="drop-icon">
+        {Icon ? <Icon size={32} strokeWidth={1.5} /> : "📁"}
+      </span>
       <span className="drop-title">{title}</span>
       <span className="drop-note">{note}</span>
-      <span className="file-name">{file?.name || "Chưa chọn file"}</span>
+      <span className="file-name">
+        {file?.name ? (
+          <>
+            <span className="file-check">
+              <CheckCircle size={16} />
+            </span>
+            {file.name}
+          </>
+        ) : (
+          "Chưa chọn file"
+        )}
+      </span>
     </label>
   );
 }
@@ -121,21 +152,24 @@ function MappingPanel({ mappingRows, setMappingRows, setStatus }) {
       <div className="panel-heading">
         <div>
           <h2>Mapping</h2>
-          <p>{editMode ? "Đang chỉnh sửa" : "Đang khóa chỉnh sửa"}</p>
+          <p>{editMode ? "Đang chỉnh sửa mapping" : "Khóa - nhấp để sửa"}</p>
         </div>
         <div className="mapping-header-actions">
           {!editMode && (
-            <button className="secondary-button" type="button" onClick={startEdit}>
-              ✎ Sửa
+            <button className="secondary-button edit-btn" type="button" onClick={startEdit}>
+              <Pencil size={16} />
+              <span>Sửa</span>
             </button>
           )}
           {editMode && (
             <>
-              <button className="secondary-button success-button" type="button" onClick={saveEdit}>
-                ✓ Lưu
+              <button className="secondary-button success-button save-btn" type="button" onClick={saveEdit}>
+                <Check size={16} />
+                <span>Lưu</span>
               </button>
-              <button className="secondary-button" type="button" onClick={cancelEdit}>
-                Hủy
+              <button className="secondary-button cancel-btn" type="button" onClick={cancelEdit}>
+                <X size={16} />
+                <span>Hủy</span>
               </button>
             </>
           )}
@@ -147,7 +181,7 @@ function MappingPanel({ mappingRows, setMappingRows, setStatus }) {
           <tr>
             <th>Cột báo cáo</th>
             <th>Cột danh mục</th>
-            <th className="mapping-actions">Xóa</th>
+            <th className="mapping-actions">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -175,7 +209,7 @@ function MappingPanel({ mappingRows, setMappingRows, setStatus }) {
                     title="Xóa dòng"
                     onClick={() => setDraftRows((currentRows) => currentRows.filter((_, rowIndex) => rowIndex !== index))}
                   >
-                    ×
+                    <Trash2 size={16} />
                   </button>
                 )}
               </td>
@@ -186,11 +220,13 @@ function MappingPanel({ mappingRows, setMappingRows, setStatus }) {
 
       {editMode && (
         <div className="mapping-tools">
-          <button className="secondary-button" type="button" onClick={() => setDraftRows((rows) => [...rows, ["", ""]])}>
-            + Thêm dòng
+          <button className="secondary-button add-row-btn" type="button" onClick={() => setDraftRows((rows) => [...rows, ["", ""]])}>
+            <Plus size={16} />
+            <span>Thêm dòng</span>
           </button>
-          <button className="secondary-button danger-light-button" type="button" onClick={() => setDraftRows(defaultMapping)}>
-            Khôi phục mặc định
+          <button className="secondary-button danger-light-button reset-btn" type="button" onClick={() => setDraftRows(defaultMapping)}>
+            <RefreshCw size={16} />
+            <span>Khôi phục</span>
           </button>
         </div>
       )}
@@ -210,6 +246,12 @@ function App() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [download, setDownload] = React.useState(null);
   const [stats, setStats] = React.useState(null);
+  const [isDark, setIsDark] = React.useState(() => localStorage.getItem("theme") === "dark");
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }, [isDark]);
 
   function setStatus(text, state = "") {
     setStatusState({ text, state });
@@ -282,7 +324,19 @@ function App() {
           <p className="eyebrow">Auto Sync Excel</p>
           <h1>Đồng bộ tồn kho vào danh mục</h1>
         </div>
-        <div className={`status-pill ${status.state}`.trim()}>{status.text}</div>
+        <div className="toolbar-controls">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={() => setIsDark(!isDark)}
+            aria-label={isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+            title={isDark ? "Chế độ sáng" : "Chế độ tối"}
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            <span className="theme-toggle-label">{isDark ? "Sáng" : "Tối"}</span>
+          </button>
+          <div className={`status-pill ${status.state}`.trim()}>{status.text}</div>
+        </div>
       </section>
 
       <section className="workspace">
@@ -301,7 +355,7 @@ function App() {
               title="File tồn kho"
               note="Kéo thả hoặc bấm để chọn"
               badge="1"
-              icon="↥"
+              icon={Upload}
               file={sourceFile}
               onFileChange={setSourceFile}
             />
@@ -311,7 +365,7 @@ function App() {
               title="File danh mục"
               note="File mẫu cần ghi dữ liệu"
               badge="2"
-              icon="▣"
+              icon={Database}
               file={targetFile}
               onFileChange={setTargetFile}
             />
@@ -325,31 +379,44 @@ function App() {
 
           <div className="options">
             <label>
-              <span>Sheet nguồn</span>
-              <input value={sourceSheet} onChange={(event) => setSourceSheet(event.target.value)} placeholder="Bỏ trống để lấy sheet đầu tiên" />
+              <span>
+                <Layers size={16} />
+                Sheet nguồn
+              </span>
+              <input value={sourceSheet} onChange={(event) => setSourceSheet(event.target.value)} placeholder="Sheet name (nếu cần)" title="Để trống sẽ lấy sheet đầu tiên" />
             </label>
             <label>
-              <span>Sheet đích</span>
-              <input value={targetSheet} onChange={(event) => setTargetSheet(event.target.value)} placeholder="Bỏ trống để lấy sheet đầu tiên" />
+              <span>
+                <Layers size={16} />
+                Sheet đích
+              </span>
+              <input value={targetSheet} onChange={(event) => setTargetSheet(event.target.value)} placeholder="Sheet name (nếu cần)" title="Để trống sẽ lấy sheet đầu tiên" />
             </label>
             <label className="wide">
-              <span>Khóa ghép</span>
-              <input value={key} onChange={(event) => setKey(event.target.value)} />
+              <span>
+                <Link2 size={16} />
+                Khóa ghép
+              </span>
+              <input value={key} onChange={(event) => setKey(event.target.value)} placeholder="Ví dụ: MA_LR,SO_LO" title="Các cột cách nhau bằng dấu phẩy để ghép dữ liệu" />
             </label>
             <label className="wide">
-              <span>Tên file kết quả</span>
-              <input value={outputName} onChange={(event) => setOutputName(event.target.value)} />
+              <span>
+                <FileText size={16} />
+                Tên file kết quả
+              </span>
+              <input value={outputName} onChange={(event) => setOutputName(event.target.value)} placeholder="danh-muc-da-dong-bo.xlsx" title="Tên file Excel sẽ được tải về" />
             </label>
           </div>
 
           <div className="actions">
             <button className="primary-button" type="submit" disabled={isSubmitting}>
-              <span>↧</span>
-              {isSubmitting ? "Đang đồng bộ" : "Đồng bộ và tải file"}
+              <Zap size={18} />
+              {isSubmitting ? "Đang đồng bộ..." : "Đồng bộ và tải file"}
             </button>
             {download && (
               <a className="download-link" href={download.url} download={download.fileName}>
-                Tải lại file kết quả
+                <Download size={16} />
+                Tải lại file
               </a>
             )}
           </div>
@@ -360,22 +427,25 @@ function App() {
 
           {stats && (
             <div className="result-card">
-              <h2>Kết quả</h2>
+              <div className="result-header">
+                <CheckCircle size={20} />
+                <h2>Kết quả</h2>
+              </div>
               <dl>
                 <div>
-                  <dt>Bản ghi nguồn</dt>
+                  <dt>📊 Bản ghi nguồn</dt>
                   <dd>{stats.sourceRecords ?? 0}</dd>
                 </div>
                 <div>
-                  <dt>Cập nhật</dt>
+                  <dt>✏️ Cập nhật</dt>
                   <dd>{stats.updated ?? 0}</dd>
                 </div>
                 <div>
-                  <dt>Thêm mới</dt>
+                  <dt>➕ Thêm mới</dt>
                   <dd>{stats.added ?? 0}</dd>
                 </div>
                 <div>
-                  <dt>Định dạng ngày</dt>
+                  <dt>📅 Định dạng ngày</dt>
                   <dd>yyyy-mm-dd</dd>
                 </div>
               </dl>
