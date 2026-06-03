@@ -26,10 +26,16 @@ outputs/danh-muc-da-dong-bo.xlsx
 npm run dev
 ```
 
-Mo trinh duyet tai:
+Lenh tren chay React UI bang Vite tai:
 
 ```text
-http://localhost:3000
+http://localhost:5173
+```
+
+Neu can chay API Express khi dev local:
+
+```powershell
+npm run dev:api
 ```
 
 Tren web, keo tha:

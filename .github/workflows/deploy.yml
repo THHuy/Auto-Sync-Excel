@@ -52,6 +52,7 @@ jobs:
 
           cd "$RELEASE_DIR"
           npm ci --omit=dev
+          npm run build
           mkdir -p outputs
 
           ln -sfn "$RELEASE_DIR" "$APP_DIR/current"

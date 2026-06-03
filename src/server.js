@@ -42,7 +42,7 @@ function parseMapping(value) {
   }
 }
 
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(path.join(__dirname, "..", "dist")));
 
 app.get("/health", (req, res) => {
   res.json({ ok: true });
@@ -84,6 +84,10 @@ app.post(
     }
   },
 );
+
+app.get(/^(?!\/api\/|\/health$).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+});
 
 const host = process.env.HOST || "0.0.0.0";
 const port = Number(process.env.PORT || 3000);
