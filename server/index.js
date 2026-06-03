@@ -6,6 +6,8 @@ import { DEFAULT_MAPPING, readWorkbookBuffer, syncWorkbooks, writeWorkbookBuffer
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const distDir = path.join(__dirname, "..", "dist");
+const indexHtml = path.join(distDir, "index.html");
 const app = express();
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -63,7 +65,7 @@ app.get("/favicon.ico", (req, res) => {
   res.status(204).end();
 });
 
-app.use(express.static(path.join(__dirname, "..", "dist")));
+app.use(express.static(distDir));
 
 app.get("/health", (req, res) => {
   res.json({ ok: true });
@@ -111,7 +113,11 @@ app.use("/api", (req, res) => {
 });
 
 app.get(/^(?!\/api\/|\/health$).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+  res.sendFile(indexHtml, (error) => {
+    if (error && !res.headersSent) {
+      res.status(503).send("Frontend build is missing. Run npm run build before starting the server.");
+    }
+  });
 });
 
 const host = process.env.HOST || "0.0.0.0";

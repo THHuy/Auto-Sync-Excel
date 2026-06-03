@@ -53,6 +53,7 @@ jobs:
           cd "$RELEASE_DIR"
           npm ci --omit=dev
           npm run build
+          test -f dist/index.html
           mkdir -p outputs
 
           ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
@@ -60,7 +61,8 @@ jobs:
           sudo systemctl restart auto-sync-excel
 
           for attempt in $(seq 1 30); do
-            if curl -fsS "http://127.0.0.1:$APP_PORT/health" >/dev/null; then
+            if curl -fsS "http://127.0.0.1:$APP_PORT/health" >/dev/null \
+              && curl -fsS "http://127.0.0.1:$APP_PORT/" | grep -q "Auto Sync Excel"; then
               echo "Health check passed"
               break
             fi
