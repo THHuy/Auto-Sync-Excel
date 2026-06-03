@@ -15,6 +15,28 @@ export const DEFAULT_MAPPING = [
   ["Số lượng", "TON_KHO"],
 ];
 
+export function normalizeMapping(mapping = DEFAULT_MAPPING) {
+  if (!Array.isArray(mapping)) {
+    throw new Error("Mapping khong hop le.");
+  }
+
+  const normalized = mapping
+    .map((item) => {
+      if (Array.isArray(item)) {
+        return [String(item[0] ?? "").trim(), String(item[1] ?? "").trim()];
+      }
+
+      return [String(item?.source ?? "").trim(), String(item?.target ?? "").trim()];
+    })
+    .filter(([sourceHeader, targetHeader]) => sourceHeader && targetHeader);
+
+  if (normalized.length === 0) {
+    throw new Error("Mapping phai co it nhat 1 dong.");
+  }
+
+  return normalized;
+}
+
 export function parseKeyHeaders(value, fallback) {
   if (!value) {
     return fallback;
@@ -290,12 +312,13 @@ function writeRowsToSheet(workbook, sheetName, rows) {
   workbook.Sheets[sheetName] = XLSX.utils.aoa_to_sheet(rows);
 }
 
-export function syncWorkbooks({ sourceWorkbook, targetWorkbook, sourceSheet, targetSheet, key }) {
+export function syncWorkbooks({ sourceWorkbook, targetWorkbook, sourceSheet, targetSheet, key, mapping = DEFAULT_MAPPING }) {
   const source = pickSheet(sourceWorkbook, sourceSheet, "nguon");
   const target = pickSheet(targetWorkbook, targetSheet, "dich");
   const sourceRows = sheetToRows(source.sheet);
   const targetRows = sheetToRows(target.sheet);
-  const config = detectSyncConfig(sourceRows, targetRows, DEFAULT_MAPPING, key);
+  const activeMapping = normalizeMapping(mapping);
+  const config = detectSyncConfig(sourceRows, targetRows, activeMapping, key);
   const stats = syncRows({
     sourceRows,
     targetRows,

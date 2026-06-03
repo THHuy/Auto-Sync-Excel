@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { readWorkbookBuffer, syncWorkbooks, writeWorkbookBuffer } from "./sync.js";
+import { DEFAULT_MAPPING, readWorkbookBuffer, syncWorkbooks, writeWorkbookBuffer } from "./sync.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +24,22 @@ function normalizeDownloadName(value) {
   }
 
   return cleanName.toLocaleLowerCase("vi-VN").endsWith(".xlsx") ? cleanName : `${cleanName}.xlsx`;
+}
+
+function parseMapping(value) {
+  if (!value) {
+    return DEFAULT_MAPPING;
+  }
+
+  try {
+    const mapping = JSON.parse(value);
+    if (!Array.isArray(mapping)) {
+      throw new Error("Mapping khong phai danh sach.");
+    }
+    return mapping;
+  } catch {
+    throw new Error("Mapping khong dung dinh dang JSON.");
+  }
 }
 
 app.use(express.static(path.join(__dirname, "..", "public")));
@@ -53,6 +69,7 @@ app.post(
         sourceSheet: req.body.sourceSheet,
         targetSheet: req.body.targetSheet,
         key: req.body.key,
+        mapping: parseMapping(req.body.mappingJson),
       });
       const output = writeWorkbookBuffer(workbook);
       const payload = Buffer.from(output);

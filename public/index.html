@@ -62,28 +62,26 @@
         </form>
 
         <aside class="info-panel">
-          <div>
-            <h2>Mapping</h2>
-            <table>
+          <div class="mapping-panel">
+            <div class="panel-heading">
+              <h2>Mapping</h2>
+              <button class="icon-button" id="editMappingButton" type="button" title="Sửa mapping">✎</button>
+            </div>
+            <input id="mappingJson" name="mappingJson" type="hidden" form="syncForm" />
+            <table class="mapping-table">
               <thead>
                 <tr>
                   <th>Cột báo cáo</th>
                   <th>Cột danh mục</th>
+                  <th class="mapping-actions">Xóa</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr><td>Mã VT</td><td>MA_LR</td></tr>
-                <tr><td>Tên Vật Tư</td><td>TEN_BD</td></tr>
-                <tr><td>Hoạt chất</td><td>TEN_HC</td></tr>
-                <tr><td>Hàm Lượng</td><td>HL_ND_QC</td></tr>
-                <tr><td>ĐVT</td><td>DVT</td></tr>
-                <tr><td>Số lô</td><td>SO_LO</td></tr>
-                <tr><td>Số Thầu</td><td>MA_BHYT</td></tr>
-                <tr><td>Ngày hết hạn</td><td>HAN_DUNG</td></tr>
-                <tr><td>Đơn giá</td><td>GIA_NHAP</td></tr>
-                <tr><td>Số lượng</td><td>TON_KHO</td></tr>
-              </tbody>
+              <tbody id="mappingBody"></tbody>
             </table>
+            <div class="mapping-tools" id="mappingTools" hidden>
+              <button class="secondary-button" id="addMappingButton" type="button">+ Thêm dòng</button>
+              <button class="secondary-button" id="resetMappingButton" type="button">Khôi phục mặc định</button>
+            </div>
           </div>
 
           <div class="result-card" id="resultCard" hidden>
