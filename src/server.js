@@ -68,7 +68,8 @@ app.post(
   },
 );
 
+const host = process.env.HOST || "0.0.0.0";
 const port = Number(process.env.PORT || 3000);
-app.listen(port, () => {
-  console.log(`Auto Sync Excel dang chay tai http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`Auto Sync Excel dang chay tai http://${host}:${port}`);
 });

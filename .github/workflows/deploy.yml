@@ -80,8 +80,22 @@ jobs:
 
           ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
           sudo systemctl restart auto-sync-excel
-          sudo systemctl is-active --quiet auto-sync-excel
-          curl -fsS "http://127.0.0.1:$APP_PORT/health" >/dev/null
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:$APP_PORT/health" >/dev/null; then
+              echo "Health check passed"
+              break
+            fi
+
+            if [ "$attempt" -eq 30 ]; then
+              echo "Health check failed"
+              sudo systemctl status auto-sync-excel --no-pager || true
+              sudo journalctl -u auto-sync-excel -n 120 --no-pager || true
+              exit 1
+            fi
+
+            sleep 1
+          done
 
           find "$APP_DIR/releases" -mindepth 1 -maxdepth 1 -type d | sort | head -n -5 | xargs -r rm -rf
           EOF
