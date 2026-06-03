@@ -1,4 +1,4 @@
-name: Deploy to AWS Ubuntu
+name: Deploy on AWS Self-Hosted Runner
 
 on:
   push:
@@ -12,17 +12,23 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - linux
+      - auto-sync-excel
+
+    env:
+      APP_DIR: /var/www/auto-sync-excel
+      APP_PORT: 3000
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+      - name: Check Node.js
+        run: |
+          node -v
+          npm -v
 
       - name: Install dependencies
         run: npm ci
@@ -30,50 +36,20 @@ jobs:
       - name: Check syntax
         run: npm run check
 
-      - name: Build release archive
-        run: |
-          git archive --format=tar.gz --output="$RUNNER_TEMP/release.tgz" HEAD
-
-      - name: Configure SSH
-        env:
-          AWS_HOST: ${{ secrets.AWS_HOST }}
-          AWS_SSH_KEY: ${{ secrets.AWS_SSH_KEY }}
-        run: |
-          test -n "$AWS_HOST"
-          test -n "$AWS_SSH_KEY"
-          mkdir -p ~/.ssh
-          printf '%s\n' "$AWS_SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$AWS_HOST" >> ~/.ssh/known_hosts
-
-      - name: Upload release
-        env:
-          AWS_HOST: ${{ secrets.AWS_HOST }}
-          AWS_USER: ${{ secrets.AWS_USER }}
-          APP_DIR: ${{ secrets.APP_DIR }}
-        run: |
-          APP_DIR="${APP_DIR:-/var/www/auto-sync-excel}"
-          AWS_USER="${AWS_USER:-ubuntu}"
-          ssh -i ~/.ssh/deploy_key "$AWS_USER@$AWS_HOST" "mkdir -p '$APP_DIR/releases'"
-          scp -i ~/.ssh/deploy_key "$RUNNER_TEMP/release.tgz" "$AWS_USER@$AWS_HOST:$APP_DIR/releases/${GITHUB_SHA}.tgz"
-
       - name: Activate release
-        env:
-          AWS_HOST: ${{ secrets.AWS_HOST }}
-          AWS_USER: ${{ secrets.AWS_USER }}
-          APP_DIR: ${{ secrets.APP_DIR }}
-          APP_PORT: ${{ secrets.APP_PORT }}
         run: |
-          APP_DIR="${APP_DIR:-/var/www/auto-sync-excel}"
-          APP_PORT="${APP_PORT:-3000}"
-          AWS_USER="${AWS_USER:-ubuntu}"
-          ssh -i ~/.ssh/deploy_key "$AWS_USER@$AWS_HOST" \
-            "APP_DIR='$APP_DIR' GITHUB_SHA='$GITHUB_SHA' APP_PORT='$APP_PORT' bash -s" <<'EOF'
           set -euo pipefail
-          RELEASE_DIR="$APP_DIR/releases/$GITHUB_SHA"
 
+          RELEASE_DIR="$APP_DIR/releases/$GITHUB_SHA"
           mkdir -p "$RELEASE_DIR"
-          tar -xzf "$APP_DIR/releases/$GITHUB_SHA.tgz" -C "$RELEASE_DIR"
+
+          rsync -a --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='outputs' \
+            --exclude='*.pem' \
+            ./ "$RELEASE_DIR/"
+
           cd "$RELEASE_DIR"
           npm ci --omit=dev
           mkdir -p outputs
@@ -98,4 +74,3 @@ jobs:
           done
 
           find "$APP_DIR/releases" -mindepth 1 -maxdepth 1 -type d | sort | head -n -5 | xargs -r rm -rf
-          EOF

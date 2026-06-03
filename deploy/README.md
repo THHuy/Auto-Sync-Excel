@@ -101,31 +101,48 @@ sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d thhinfo.xyz
 ```
 
-## 6. Thêm GitHub Actions secrets
+## 6. Cài GitHub self-hosted runner trên AWS
+
+Cách này không cần mở SSH cho GitHub Actions. Server AWS tự kết nối ra GitHub qua HTTPS, nên Security Group vẫn có thể giữ SSH chỉ cho IP máy cá nhân.
 
 Vào GitHub repo:
 
 ```text
-Settings -> Secrets and variables -> Actions -> New repository secret
+Settings -> Actions -> Runners -> New self-hosted runner -> Linux
 ```
 
-Tạo các secret:
+Chạy các lệnh GitHub đưa ra trên server AWS. Khi GitHub hỏi label, thêm label:
 
 ```text
-AWS_HOST      = YOUR_AWS_PUBLIC_IP
-AWS_USER      = ubuntu
-AWS_SSH_KEY   = nội dung private key .pem
-APP_DIR       = /var/www/auto-sync-excel
-APP_PORT      = 3000
+auto-sync-excel
 ```
 
-Lấy nội dung key:
+Ví dụ thư mục runner:
 
 ```bash
-cat ExcelSync.pem
+mkdir -p ~/actions-runner
+cd ~/actions-runner
 ```
 
-Không commit file `.pem` lên GitHub.
+Sau khi `./config.sh` xong, cài runner thành service:
+
+```bash
+sudo ./svc.sh install
+sudo ./svc.sh start
+sudo ./svc.sh status
+```
+
+Cho user `ubuntu` được restart service app không cần nhập password:
+
+```bash
+sudo visudo
+```
+
+Thêm dòng:
+
+```text
+ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart auto-sync-excel, /bin/systemctl status auto-sync-excel, /bin/journalctl -u auto-sync-excel -n 120 --no-pager
+```
 
 ## 7. Auto deploy
 
@@ -133,9 +150,9 @@ Mỗi lần push vào nhánh `main`, workflow `.github/workflows/deploy.yml` s�
 
 1. Cài dependency.
 2. Chạy `npm run check`.
-3. Đóng gói source.
-4. Upload lên AWS.
-5. Chạy `npm ci --omit=dev`.
+3. Copy source vào `/var/www/auto-sync-excel/releases/<commit>`.
+4. Chạy `npm ci --omit=dev`.
+5. Trỏ `/var/www/auto-sync-excel/current` sang release mới.
 6. Restart service `auto-sync-excel`.
 7. Kiểm tra `/health`.
 
