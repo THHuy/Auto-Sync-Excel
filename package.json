@@ -1,0 +1,20 @@
+{
+  "name": "auto-sync-excel",
+  "version": "1.0.0",
+  "description": "Web UI va CLI dong bo du lieu Excel theo mapping cot vat tu.",
+  "type": "module",
+  "bin": {
+    "auto-sync-excel": "./src/cli.js"
+  },
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "sync:sample": "node src/cli.js --source \"C:/Users/truon/Downloads/rp_chiemkhoduoc_intonkho_1780037227.xls\" --target \"C:/Users/truon/Downloads/Danh mục thuốc hóa chất vtyt,..._.xlsx\" --output \"outputs/danh-muc-da-dong-bo.xlsx\"",
+    "check": "node --check src/cli.js && node --check src/server.js && node --check src/sync.js && node --check public/app.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "xlsx": "^0.18.5"
+  }
+}

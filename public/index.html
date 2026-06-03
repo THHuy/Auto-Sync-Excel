@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auto Sync Excel</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="toolbar">
+        <div>
+          <p class="eyebrow">Auto Sync Excel</p>
+          <h1>Đồng bộ tồn kho vào danh mục</h1>
+        </div>
+        <div class="status-pill" id="statusPill">Sẵn sàng</div>
+      </section>
+
+      <section class="workspace">
+        <form id="syncForm" class="sync-panel">
+          <div class="drop-grid">
+            <label class="drop-zone" data-drop-zone="source">
+              <input id="sourceInput" name="source" type="file" accept=".xls,.xlsx" />
+              <span class="drop-icon">↑</span>
+              <span class="drop-title">File tồn kho</span>
+              <span class="drop-note">Kéo thả hoặc bấm để chọn .xls/.xlsx</span>
+              <span class="file-name" id="sourceName">Chưa chọn file</span>
+            </label>
+
+            <label class="drop-zone" data-drop-zone="target">
+              <input id="targetInput" name="target" type="file" accept=".xls,.xlsx" />
+              <span class="drop-icon">□</span>
+              <span class="drop-title">File danh mục</span>
+              <span class="drop-note">File mẫu cần ghi dữ liệu đồng bộ</span>
+              <span class="file-name" id="targetName">Chưa chọn file</span>
+            </label>
+          </div>
+
+          <div class="options">
+            <label>
+              <span>Sheet nguồn</span>
+              <input name="sourceSheet" type="text" placeholder="Bỏ trống để lấy sheet đầu tiên" />
+            </label>
+            <label>
+              <span>Sheet đích</span>
+              <input name="targetSheet" type="text" placeholder="Bỏ trống để lấy sheet đầu tiên" />
+            </label>
+            <label class="wide">
+              <span>Khóa ghép</span>
+              <input name="key" type="text" value="MA_LR,SO_LO,MA_BHYT,HAN_DUNG" />
+            </label>
+            <label class="wide">
+              <span>Tên file kết quả</span>
+              <input name="outputName" type="text" value="danh-muc-da-dong-bo.xlsx" />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button id="syncButton" type="submit">Đồng bộ và tải file</button>
+            <a id="downloadLink" class="download-link" hidden>Tải lại file kết quả</a>
+          </div>
+        </form>
+
+        <aside class="info-panel">
+          <div>
+            <h2>Mapping</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Cột báo cáo</th>
+                  <th>Cột danh mục</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Mã VT</td><td>MA_LR</td></tr>
+                <tr><td>Tên Vật Tư</td><td>TEN_BD</td></tr>
+                <tr><td>Hoạt chất</td><td>TEN_HC</td></tr>
+                <tr><td>Hàm Lượng</td><td>HL_ND_QC</td></tr>
+                <tr><td>ĐVT</td><td>DVT</td></tr>
+                <tr><td>Số lô</td><td>SO_LO</td></tr>
+                <tr><td>Số Thầu</td><td>MA_BHYT</td></tr>
+                <tr><td>Ngày hết hạn</td><td>HAN_DUNG</td></tr>
+                <tr><td>Đơn giá</td><td>GIA_NHAP</td></tr>
+                <tr><td>Số lượng</td><td>TON_KHO</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="result-card" id="resultCard" hidden>
+            <h2>Kết quả</h2>
+            <dl>
+              <div><dt>Bản ghi nguồn</dt><dd id="sourceRecords">0</dd></div>
+              <div><dt>Cập nhật</dt><dd id="updatedRows">0</dd></div>
+              <div><dt>Thêm mới</dt><dd id="addedRows">0</dd></div>
+              <div><dt>Định dạng ngày</dt><dd>yyyy-mm-dd</dd></div>
+            </dl>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
