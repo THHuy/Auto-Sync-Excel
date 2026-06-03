@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import process from "node:process";
-import { readWorkbookFile, syncWorkbooks, writeWorkbookFile } from "./sync.js";
+import { readWorkbookFile, syncWorkbooks, writeWorkbookFile } from "../server/sync.js";
 
 function parseArgs(argv) {
   const args = {};
@@ -40,7 +40,7 @@ function requireFile(filePath, label) {
 function usage() {
   return [
     "Cach dung:",
-    '  node src/cli.js --source "nguon.xls" --target "dich.xlsx" --output "ket-qua.xlsx"',
+    '  node scripts/cli.js --source "nguon.xls" --target "dich.xlsx" --output "ket-qua.xlsx"',
     "",
     "Tuy chon:",
     "  --source-sheet <ten sheet>",

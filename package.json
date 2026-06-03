@@ -4,15 +4,15 @@
   "description": "Web UI va CLI dong bo du lieu Excel theo mapping cot vat tu.",
   "type": "module",
   "bin": {
-    "auto-sync-excel": "./src/cli.js"
+    "auto-sync-excel": "./scripts/cli.js"
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "dev:api": "node src/server.js",
+    "dev:api": "node server/index.js",
     "build": "vite build",
-    "start": "node src/server.js",
-    "sync:sample": "node src/cli.js --source \"C:/Users/truon/Downloads/rp_chiemkhoduoc_intonkho_1780037227.xls\" --target \"C:/Users/truon/Downloads/Danh mục thuốc hóa chất vtyt,..._.xlsx\" --output \"outputs/danh-muc-da-dong-bo.xlsx\"",
-    "check": "node --check src/cli.js && node --check src/server.js && node --check src/sync.js && npm run build"
+    "start": "node server/index.js",
+    "sync:sample": "node scripts/cli.js --source \"C:/Users/truon/Downloads/rp_chiemkhoduoc_intonkho_1780037227.xls\" --target \"C:/Users/truon/Downloads/Danh mục thuốc hóa chất vtyt,..._.xlsx\" --output \"outputs/danh-muc-da-dong-bo.xlsx\"",
+    "check": "node --check scripts/cli.js && node --check server/index.js && node --check server/sync.js && npm run build"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^6.0.2",

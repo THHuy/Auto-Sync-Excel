@@ -47,7 +47,7 @@ Tren web, keo tha:
 ## Chay voi file khac
 
 ```powershell
-node src/cli.js --source "duong-dan-file-nguon.xls" --target "duong-dan-file-dich.xlsx" --output "outputs/ket-qua.xlsx"
+node scripts/cli.js --source "duong-dan-file-nguon.xls" --target "duong-dan-file-dich.xlsx" --output "outputs/ket-qua.xlsx"
 ```
 
 ## Deploy len AWS Ubuntu
